@@ -4,7 +4,30 @@
     ViewData["Title"] = "Home page";
 }
 
+<head>
+    <title>Landsat Data</title>
+    <script>
+        function initMap() {
+            var location = { lat: 44.6488, lng: -63.5752 }; // Halifax coordinates
+            var map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 10,
+                center: location
+            });
+            // Add click event listener
+            google.maps.event.addListener(map, 'click', function (event) {
+                var clickedLocation = event.latLng;
+                alert("Latitude: " + clickedLocation.lat() + "\nLongitude: " + clickedLocation.lng());
+            });
+        }
+    </script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap" async defer></script>
+</head>
+
 <div class="text-center">
-    <h1 class="display-4">Placeholder</h1>
-    <p>This is where we will put the Google Maps API map (probably).</p>
+    <h1>Click on the map to get Landsat data</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
 </div>
+
+
