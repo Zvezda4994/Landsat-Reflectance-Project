@@ -6,7 +6,7 @@
 
 <head>
     <title>Landsat Data</title>
-    <script>
+    <script type="application/javascript">
         function initMap() {
             var location = { lat: 44.6488, lng: -63.5752 }; // Halifax coordinates
             var map = new google.maps.Map(document.getElementById("map"), {
@@ -16,15 +16,21 @@
             // Add click event listener
             google.maps.event.addListener(map, 'click', function (event) {
                 var clickedLocation = event.latLng;
-
-                fetch("/Index/HandleJSCalll", {
+               // console.log(clickedLocation.lat() + " " + clickedLocation.lng())
+               console.log("Pinging server: ") 
+               fetch("/Index?handler=HandleJSCall", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(clickedLocation)
+                    body: JSON.stringify({ latitude: clickedLocation.lat(), longitude: clickedLocation.lng() })
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok: " + response.status);
+                        }
+                    return response.json();
+                    })                    
                     .then(data => {
                         console.log("Response: ", data);
                     })

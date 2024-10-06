@@ -13,7 +13,6 @@ namespace LandsatReflectance.Pages
         {
             _logger = logger;
         }
-
        
 
         public static void Initialize()
@@ -25,11 +24,27 @@ namespace LandsatReflectance.Pages
 
         public IActionResult OnPostHandleJSCall([FromBody] dynamic data)
         {
-            string jsValue = data.someValue;
-            string responseMessage = $"Received: {jsValue}";
-            RunPythonCode("NASA_SpaceApps", jsValue);
+            Console.WriteLine("OnPostHandleJSCall was called");
+
+            // Check if data is null or if required properties are missing
+            if (data == null || data.latitude == null || data.longitude == null)
+            {
+                Console.WriteLine("Invalid data received.");
+                return BadRequest(new { message = "Invalid data received." });
+            }
+
+            // Extract latitude and longitude
+            double latitude = data.latitude;
+            double longitude = data.longitude;
+
+            // Log received values
+            Console.WriteLine($"Latitude: {latitude}, Longitude: {longitude}");
+
+            // Create response message
+            string responseMessage = $"Received: Latitude {latitude}, Longitude {longitude}";
 
             return new JsonResult(new { message = responseMessage });
+        
         }
 
         public static void RunPythonCode(string scriptName, string Data)
@@ -44,13 +59,5 @@ namespace LandsatReflectance.Pages
                 var feedback = pythonScript.InvokeMethod("landsatSceneLEVEL2", new PyObject[] {message});
             }
         }
-
-
-
-
-
-
-
-
     }
 }
