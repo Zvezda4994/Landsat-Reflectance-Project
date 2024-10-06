@@ -10,7 +10,7 @@ TOKEN = 'eyJjaWQiOjI3Mjk2OTU1LCJzIjoiMTcyODIxOTY2MSIsInIiOjQ4MSwicCI6WyJ1c2VyIl1
 APIENDPOINT = 'https://m2m.cr.usgs.gov/api/api/json/stable/'
 LEVEL2 = "landsat_ot_c2_l2"
 
-def landsatSceneLEVEL2(api_key, lat, lng):
+def landsatSceneLEVEL2(api_key, lat, lng, cloudmin, cloudmax, datebegin, dateend):
     headers = {"X-Auth-Token": api_key, "Content-Type": "application/json"}
     payload = {
         "datasetName": LEVEL2,
@@ -20,8 +20,8 @@ def landsatSceneLEVEL2(api_key, lat, lng):
                 "lowerLeft": {"latitude": lat - 0.5, "longitude": lng - 0.5},
                 "upperRight": {"latitude": lat + 0.5, "longitude": lng + 0.5}
             },
-            'acquisitionFilter': {'start': '2023-03-01', 'end': '2024-10-03'},
-            'cloudCoverFilter': {'min': 0, 'max': 10}
+            'acquisitionFilter': {'start': datebegin, 'end': dateend},
+            'cloudCoverFilter': {'min':  cloudmin, 'max': cloudmax}
         },
         "maxResults": 15,
         "sortField": "acquisitionDate",
@@ -39,9 +39,13 @@ def get_landsat_data():
     data = request.get_json()
     lat = float(data['latitude'])
     lng = float(data['longitude'])
+    cloudmin = int(data['cloudmin'])
+    cloudmax = int(data['cloudmax'])
+    datebegin = data['datebegin']
+    dateend = data['dateend']
     api_key = TOKEN  # Use TOKEN as the api_key directly
 
-    result = landsatSceneLEVEL2(api_key, lat, lng)
+    result = landsatSceneLEVEL2(api_key, lat, lng, cloudmin, cloudmax, datebegin, dateend)
 
     if 'data' in result and 'results' in result['data'] and result['data']['results']:
         scene = result['data']['results'][0]
@@ -63,11 +67,13 @@ def get_landsat_data():
         path = pathRow[3:6]
         row = pathRow[6:9]
         cloud_cover = scene.get('cloudCover', 'N/A')
+        print(dateString)
 
         response_data = {
             'browse_path': browse_path,
             'next_overpass_date': next_overpass_date_str,
             'satellite': satellite,
+            'scene_date_taken' : dateString.split()[0],
             'path': path,
             'row': row,
             'cloud_cover': cloud_cover

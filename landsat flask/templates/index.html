@@ -16,6 +16,19 @@
 <body>
 
   <h1>Select a Location</h1>
+  <div cloudParamForm>
+
+    <form name = "cloudInterval" action = "" method = "POST">
+
+      Minimum Cloud Coverage<br><input type="number" id="cloudmin" value="cloudmin" min="0" max="100"></option><br>
+      Maximum Cloud Coverage<br><input type="number" id="cloudmax" value="cloudmax" min="0" max="100"></option><br>
+      <br>
+      Date Range Beginning<br><input type="date" id="datebegin" value="datebegin" min="0" max="100"></option><br>
+      Date Range End<br><input type="date" id="dateend" value="dateend" min="0" max="100"></option>
+  
+    </form>
+
+  </div>
   <div id="map"></div>
   <div id="result"></div>
 
@@ -31,6 +44,10 @@
         var clickedLocation = event.latLng;
         var lat = clickedLocation.lat();
         var lng = clickedLocation.lng();
+        var cloudmin = document.getElementById("cloudmin").value;
+        var cloudmax = document.getElementById("cloudmax").value;
+        var datebegin = document.getElementById("datebegin").value;
+        var dateend = document.getElementById("dateend").value;
 
         // Send the lat and lng to the server
         fetch('/get_landsat_data', {
@@ -40,7 +57,11 @@
           },
           body: JSON.stringify({
             latitude: lat,
-            longitude: lng
+            longitude: lng,
+            cloudmin: cloudmin,
+            cloudmax: cloudmax,
+            datebegin: datebegin,
+            dateend: dateend
           })
         })
         .then(response => response.json())
@@ -52,8 +73,9 @@
               <p><strong>Satellite:</strong> ${data.satellite}</p>
               <p><strong>Path:</strong> ${data.path} <strong>Row:</strong> ${data.row}</p>
               <p><strong>Cloud Coverage:</strong> ${data.cloud_cover}%</p>
+              <p><strong>Date Scene Image Taken:</strong> ${data.scene_date_taken}%</p>
               <p><strong>Next Overpass Date:</strong> ${data.next_overpass_date}</p>
-              <p><strong>Browse Image URL:</strong> <a href="${data.browse_path}" target="_blank">View Image</a></p>
+              <p><a><img src = "${data.browse_path}" /></a></p>
             `;
           }
         })
