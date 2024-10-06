@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Landsat Data Viewer</title>
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Select a Location</h1>
+  <div id="map"></div>
+  <div id="result"></div>
+
+  <script>
+    function initMap() {
+      var location = { lat: 44.6488, lng: -63.5752 }; // Halifax coordinates
+      var map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 10,
+        center: location
+      });
+      // Add click event listener
+      google.maps.event.addListener(map, 'click', function(event) {
+        var clickedLocation = event.latLng;
+        var lat = clickedLocation.lat();
+        var lng = clickedLocation.lng();
+
+        // Send the lat and lng to the server
+        fetch('/get_landsat_data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lng
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            document.getElementById('result').innerHTML = `<p>${data.error}</p>`;
+          } else {
+            document.getElementById('result').innerHTML = `
+              <p><strong>Satellite:</strong> ${data.satellite}</p>
+              <p><strong>Path:</strong> ${data.path} <strong>Row:</strong> ${data.row}</p>
+              <p><strong>Cloud Coverage:</strong> ${data.cloud_cover}%</p>
+              <p><strong>Next Overpass Date:</strong> ${data.next_overpass_date}</p>
+              <p><strong>Browse Image URL:</strong> <a href="${data.browse_path}" target="_blank">View Image</a></p>
+            `;
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    }
+  </script>
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap" async defer></script>
+</body>
+</html>
