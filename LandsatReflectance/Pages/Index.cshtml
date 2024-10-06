@@ -16,9 +16,24 @@
             // Add click event listener
             google.maps.event.addListener(map, 'click', function (event) {
                 var clickedLocation = event.latLng;
+
+                fetch("/Index/HandleJSCalll", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(clickedLocation)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Response: ", data);
+                    })
+                    .catch(error => console.error("Error: ", error));
+                
                 alert("Latitude: " + clickedLocation.lat() + "\nLongitude: " + clickedLocation.lng());
             });
         }
+        
     </script>
 
     <!-- Google Maps API -->
